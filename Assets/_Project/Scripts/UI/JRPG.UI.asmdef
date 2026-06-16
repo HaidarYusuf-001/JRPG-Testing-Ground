@@ -1,0 +1,17 @@
+{
+    "name": "JRPG.UI",
+    "rootNamespace": "",
+    "references": [
+        "GUID:9e3332d37d6ea4e4fa73103b668b6931",
+        "GUID:e505a1130aca1a64d8d54d40886c8116"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

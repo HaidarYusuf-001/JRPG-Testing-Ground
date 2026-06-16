@@ -19,24 +19,13 @@ namespace JRPG.Combat
 
         public override void EnterState()
         {
-            Debug.Log("Player's Turn: Press SPACE to Attack.");
+            Debug.Log("Player's Turn: Waiting for UI input...");
+            combatManager.TriggerPlayerTurnUI();
         }
 
-        public override void UpdateState()
+        public override void ExitState()
         {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                combatManager.Player.DealDamage(combatManager.Enemy);
-
-                if (combatManager.Enemy.Stats["HP"].CurrentValue <= 0)
-                {
-                    combatManager.ChangeState(new WinState(combatManager));
-                }
-                else
-                {
-                    combatManager.ChangeState(new EnemyTurnState(combatManager));
-                }
-            }
+            combatManager.HidePlayerTurnUI();
         }
     }
 
