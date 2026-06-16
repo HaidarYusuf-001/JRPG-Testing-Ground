@@ -2,7 +2,8 @@
     "name": "JRPG.Combat",
     "rootNamespace": "",
     "references": [
-        "GUID:9e3332d37d6ea4e4fa73103b668b6931"
+        "GUID:9e3332d37d6ea4e4fa73103b668b6931",
+        "GUID:08edc0de8a71b514ba7bdf36e1e08117"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

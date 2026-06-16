@@ -4,24 +4,22 @@ using JRPG.Core;
 
 namespace JRPG.UI
 {
+    // Observer untuk memperbarui UI berdasarkan event dari HealthComponent.
     public class HealthBarUI : MonoBehaviour
     {
-        public Entity TargetEntity;
+        public HealthComponent TargetHealth;
         public Slider HealthSlider;
 
-        // Mendaftarkan fungsi ke event saat script aktif
         private void OnEnable()
         {
-            if (TargetEntity != null) TargetEntity.OnHealthChanged += UpdateHealthBar;
+            if (TargetHealth != null) TargetHealth.OnHealthChanged += UpdateHealthBar;
         }
 
-        // Mencabut fungsi dari event saat script nonaktif mencegah memory leak
         private void OnDisable()
         {
-            if (TargetEntity != null) TargetEntity.OnHealthChanged -= UpdateHealthBar;
+            if (TargetHealth != null) TargetHealth.OnHealthChanged -= UpdateHealthBar;
         }
 
-        // Memperbarui visual slider sesuai nilai HP
         private void UpdateHealthBar(float currentHP, float maxHP)
         {
             if (HealthSlider.maxValue != maxHP) HealthSlider.maxValue = maxHP;

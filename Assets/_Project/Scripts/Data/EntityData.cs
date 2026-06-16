@@ -1,8 +1,9 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace JRPG.Data
 {
-    // Aset data statis untuk menyimpan base stat karakter dan musuh
+    // Aset statis untuk konfigurasi awal atribut entitas.
     [CreateAssetMenu(fileName = "NewEntityData", menuName = "JRPG/Data/Entity Data")]
     public class EntityData : ScriptableObject
     {
@@ -11,5 +12,6 @@ namespace JRPG.Data
         public float BaseMP;
         public float BaseAttack;
         public float BaseDefense;
+        public List<SkillData> BaseSkills;
     }
 }

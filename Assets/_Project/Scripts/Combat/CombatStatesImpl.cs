@@ -36,16 +36,8 @@ namespace JRPG.Combat
         public override void EnterState()
         {
             Debug.Log("Enemy's Turn: AI is attacking...");
-            combatManager.Enemy.DealDamage(combatManager.Player);
-
-            if (combatManager.Player.Stats["HP"].CurrentValue <= 0)
-            {
-                combatManager.ChangeState(new LoseState(combatManager));
-            }
-            else
-            {
-                combatManager.ChangeState(new PlayerTurnState(combatManager));
-            }
+            combatManager.ExecutePhysicalAttack(combatManager.Enemy, combatManager.Player);
+            combatManager.CheckCombatEndCondition();
         }
     }
 

@@ -4,6 +4,7 @@ using System;
 
 namespace JRPG.Combat
 {
+    // Context utama pengatur state machine combat.
     public class CombatManager : MonoBehaviour
     {
         private CombatState currentState;
@@ -32,34 +33,54 @@ namespace JRPG.Combat
             currentState?.EnterState();
         }
 
-        // Mengeksekusi serangan pemain saat tombol UI ditekan
+        // Mengeksekusi serangan fisik dari UI dan mengatur transisi turn.
         public void OnAttackButtonClicked()
         {
             if (currentState is PlayerTurnState)
             {
-                Player.DealDamage(Enemy);
-
-                if (Enemy.Stats["HP"].CurrentValue <= 0)
-                {
-                    ChangeState(new WinState(this));
-                }
-                else
-                {
-                    ChangeState(new EnemyTurnState(this));
-                }
+                ExecutePhysicalAttack(Player, Enemy);
+                CheckCombatEndCondition();
             }
         }
 
-        // Memancarkan event bahwa giliran pemain dimulai
-        public void TriggerPlayerTurnUI()
+        // Logika kalkulasi serangan fisik murni.
+        public void ExecutePhysicalAttack(Entity attacker, Entity defender)
         {
-            OnPlayerTurnStarted?.Invoke();
+            if (!defender.TryGetComponent<HealthComponent>(out var targetHealth)) return;
+
+            float damage = attacker.Stats["Attack"].CurrentValue;
+            if (defender.Stats.ContainsKey("Defense"))
+            {
+                damage = Mathf.Max(1f, damage - defender.Stats["Defense"].CurrentValue);
+            }
+
+            Debug.Log($"{attacker.gameObject.name} attacks for {damage} damage!");
+            targetHealth.TakeDamage(damage);
         }
 
-        // Memancarkan event bahwa giliran pemain selesai
-        public void HidePlayerTurnUI()
+        // Memeriksa status HP untuk menentukan kemenangan atau transisi.
+        public void CheckCombatEndCondition()
         {
-            OnPlayerTurnEnded?.Invoke();
+            var enemyHealth = Enemy.GetComponent<HealthComponent>();
+            var playerHealth = Player.GetComponent<HealthComponent>();
+
+            if (enemyHealth != null && enemyHealth.GetCurrentHealth() <= 0)
+            {
+                ChangeState(new WinState(this));
+            }
+            else if (playerHealth != null && playerHealth.GetCurrentHealth() <= 0)
+            {
+                ChangeState(new LoseState(this));
+            }
+            else
+            {
+                // Toggle turn sederhana.
+                if (currentState is PlayerTurnState) ChangeState(new EnemyTurnState(this));
+                else ChangeState(new PlayerTurnState(this));
+            }
         }
+
+        public void TriggerPlayerTurnUI() => OnPlayerTurnStarted?.Invoke();
+        public void HidePlayerTurnUI() => OnPlayerTurnEnded?.Invoke();
     }
 }
