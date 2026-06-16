@@ -4,7 +4,6 @@ using UnityEngine;
 
 namespace JRPG.Core
 {
-    // Class dasar untuk semua karakter
     public abstract class Entity : MonoBehaviour
     {
         public Dictionary<string, Stat> Stats = new Dictionary<string, Stat>();
@@ -17,10 +16,8 @@ namespace JRPG.Core
             InitializeStats();
         }
 
-        // Diimplementasikan oleh class turunan untuk inisialisasi stat
         protected abstract void InitializeStats();
 
-        // Mengkalkulasi pengurangan HP dari damage
         public virtual void TakeDamage(float amount)
         {
             if (!Stats.ContainsKey("HP")) return;
@@ -34,9 +31,24 @@ namespace JRPG.Core
             }
         }
 
-        // Menonaktifkan entitas saat HP habis
+        public virtual void DealDamage(Entity target)
+        {
+            if (!Stats.ContainsKey("Attack")) return;
+
+            float damage = Stats["Attack"].CurrentValue;
+
+            if (target.Stats.ContainsKey("Defense"))
+            {
+                damage = Mathf.Max(1f, damage - target.Stats["Defense"].CurrentValue);
+            }
+
+            Debug.Log($"{gameObject.name} attacks {target.gameObject.name} for {damage} damage!");
+            target.TakeDamage(damage);
+        }
+
         protected virtual void Die()
         {
+            Debug.Log($"{gameObject.name} has died.");
             OnEntityDied?.Invoke(this);
             gameObject.SetActive(false);
         }

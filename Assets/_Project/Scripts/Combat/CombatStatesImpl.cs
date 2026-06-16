@@ -2,7 +2,6 @@ using UnityEngine;
 
 namespace JRPG.Combat
 {
-    // State saat pertarungan baru dimulai untuk proses inisialisasi
     public class CombatStartState : CombatState
     {
         public CombatStartState(CombatManager manager) : base(manager) { }
@@ -10,35 +9,74 @@ namespace JRPG.Combat
         public override void EnterState()
         {
             Debug.Log("Combat Started: Setting up battlefield.");
-
-            // Transisi ke giliran pemain setelah setup selesai
             combatManager.ChangeState(new PlayerTurnState(combatManager));
         }
     }
 
-    // State saat menunggu pemain memilih aksi dari UI
     public class PlayerTurnState : CombatState
     {
         public PlayerTurnState(CombatManager manager) : base(manager) { }
 
         public override void EnterState()
         {
-            Debug.Log("Player's Turn: Waiting for input...");
-            // Nanti event sistem akan di-trigger di sini untuk memunculkan UI
+            Debug.Log("Player's Turn: Press SPACE to Attack.");
+        }
+
+        public override void UpdateState()
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                combatManager.Player.DealDamage(combatManager.Enemy);
+
+                if (combatManager.Enemy.Stats["HP"].CurrentValue <= 0)
+                {
+                    combatManager.ChangeState(new WinState(combatManager));
+                }
+                else
+                {
+                    combatManager.ChangeState(new EnemyTurnState(combatManager));
+                }
+            }
         }
     }
 
-    // State saat AI musuh mengeksekusi aksinya
     public class EnemyTurnState : CombatState
     {
         public EnemyTurnState(CombatManager manager) : base(manager) { }
 
         public override void EnterState()
         {
-            Debug.Log("Enemy's Turn: AI is thinking...");
+            Debug.Log("Enemy's Turn: AI is attacking...");
+            combatManager.Enemy.DealDamage(combatManager.Player);
 
-            // Simulasi AI selesai berpikir dan mengembalikan giliran ke pemain
-            combatManager.ChangeState(new PlayerTurnState(combatManager));
+            if (combatManager.Player.Stats["HP"].CurrentValue <= 0)
+            {
+                combatManager.ChangeState(new LoseState(combatManager));
+            }
+            else
+            {
+                combatManager.ChangeState(new PlayerTurnState(combatManager));
+            }
+        }
+    }
+
+    public class WinState : CombatState
+    {
+        public WinState(CombatManager manager) : base(manager) { }
+
+        public override void EnterState()
+        {
+            Debug.Log("Result: You Win! Combat Ended.");
+        }
+    }
+
+    public class LoseState : CombatState
+    {
+        public LoseState(CombatManager manager) : base(manager) { }
+
+        public override void EnterState()
+        {
+            Debug.Log("Result: You Lose! Game Over.");
         }
     }
 }
