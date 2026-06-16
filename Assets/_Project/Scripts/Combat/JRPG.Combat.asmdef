@@ -1,0 +1,16 @@
+{
+    "name": "JRPG.Combat",
+    "rootNamespace": "",
+    "references": [
+        "GUID:9e3332d37d6ea4e4fa73103b668b6931"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
