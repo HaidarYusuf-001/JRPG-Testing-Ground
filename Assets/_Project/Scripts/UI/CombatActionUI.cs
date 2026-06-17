@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using JRPG.Combat;
+using JRPG.Core;
+using JRPG.Data;
 
 namespace JRPG.UI
 {
@@ -10,7 +13,10 @@ namespace JRPG.UI
         public Button AttackButton;
         public GameObject ActionPanel;
 
-        // Subscribe event dari CombatManager dan daftarkan aksi tombol
+        [Header("Skills Setup")]
+        public GameObject SkillButtonPrefab;
+        public Transform SkillPanel;
+
         private void OnEnable()
         {
             Manager.OnPlayerTurnStarted += ShowPanel;
@@ -19,7 +25,6 @@ namespace JRPG.UI
             HidePanel();
         }
 
-        // Unsubscribe event saat tidak digunakan
         private void OnDisable()
         {
             Manager.OnPlayerTurnStarted -= ShowPanel;
@@ -27,16 +32,27 @@ namespace JRPG.UI
             AttackButton.onClick.RemoveListener(Manager.OnAttackButtonClicked);
         }
 
-        // Menampilkan panel tombol aksi
-        private void ShowPanel()
+        private void Start()
         {
-            ActionPanel.SetActive(true);
+            GenerateSkillButtons();
         }
 
-        // Menyembunyikan panel tombol aksi
-        private void HidePanel()
+        // Membuat tombol secara dinamis berdasarkan data skill karakter.
+        private void GenerateSkillButtons()
         {
-            ActionPanel.SetActive(false);
+            if (Manager.Player.TryGetComponent<SkillComponent>(out var skillComp))
+            {
+                foreach (SkillData skill in skillComp.AvailableSkills)
+                {
+                    GameObject btnObj = Instantiate(SkillButtonPrefab, SkillPanel);
+                    btnObj.GetComponentInChildren<TextMeshProUGUI>().text = $"{skill.SkillName} ({skill.ManaCost} MP)";
+
+                    btnObj.GetComponent<Button>().onClick.AddListener(() => Manager.OnSkillButtonClicked(skill));
+                }
+            }
         }
+
+        private void ShowPanel() => ActionPanel.SetActive(true);
+        private void HidePanel() => ActionPanel.SetActive(false);
     }
 }
