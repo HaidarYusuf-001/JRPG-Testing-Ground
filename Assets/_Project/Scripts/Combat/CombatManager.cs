@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 namespace JRPG.Combat
 {
+    // Context utama pengatur state machine combat.
     public class CombatManager : MonoBehaviour
     {
         private CombatState currentState;
@@ -18,7 +19,6 @@ namespace JRPG.Combat
         public event Action OnPlayerTurnStarted;
         public event Action OnPlayerTurnEnded;
 
-        // Mendaftarkan implementasi strategy pattern ke dalam dictionary.
         private void Awake()
         {
             skillStrategies = new Dictionary<SkillType, ISkillStrategy>
@@ -54,7 +54,6 @@ namespace JRPG.Combat
             }
         }
 
-        // Mengeksekusi skill berdasarkan input tombol dinamis dari UI.
         public void OnSkillButtonClicked(SkillData skill)
         {
             if (currentState is PlayerTurnState)
@@ -69,12 +68,17 @@ namespace JRPG.Combat
                 }
 
                 Entity target = skill.Type == SkillType.Heal ? Player : Enemy;
+                ExecuteSkill(Player, target, skill);
+                CheckCombatEndCondition();
+            }
+        }
 
-                if (skillStrategies.TryGetValue(skill.Type, out var strategy))
-                {
-                    strategy.Execute(Player, target, skill);
-                    CheckCombatEndCondition();
-                }
+        // Fungsi publik agar AI juga bisa mengeksekusi skill strategy.
+        public void ExecuteSkill(Entity caster, Entity target, SkillData skill)
+        {
+            if (skillStrategies.TryGetValue(skill.Type, out var strategy))
+            {
+                strategy.Execute(caster, target, skill);
             }
         }
 

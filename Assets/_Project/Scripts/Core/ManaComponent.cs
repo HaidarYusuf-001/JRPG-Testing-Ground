@@ -11,7 +11,6 @@ namespace JRPG.Core
 
         public event Action<float, float> OnManaChanged;
 
-        // Inisialisasi nilai MP awal.
         public void Initialize(float maxMP)
         {
             maxMana = maxMP;
@@ -19,7 +18,6 @@ namespace JRPG.Core
             OnManaChanged?.Invoke(currentMana, maxMana);
         }
 
-        // Mengurangi MP dan mengembalikan status validasi konsumsi.
         public bool Consume(float amount)
         {
             if (currentMana < amount) return false;
@@ -29,11 +27,12 @@ namespace JRPG.Core
             return true;
         }
 
-        // Menambah MP tanpa melebihi batas maksimal.
         public void Restore(float amount)
         {
             currentMana = Mathf.Clamp(currentMana + amount, 0f, maxMana);
             OnManaChanged?.Invoke(currentMana, maxMana);
         }
+
+        public float GetCurrentMana() => currentMana;
     }
 }
