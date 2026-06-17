@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace JRPG.Data
 {
-    // Aset statis untuk konfigurasi awal atribut entitas.
+    // Aset statis untuk konfigurasi awal atribut dan kepemilikan entitas.
     [CreateAssetMenu(fileName = "NewEntityData", menuName = "JRPG/Data/Entity Data")]
     public class EntityData : ScriptableObject
     {
@@ -13,5 +13,6 @@ namespace JRPG.Data
         public float BaseAttack;
         public float BaseDefense;
         public List<SkillData> BaseSkills;
+        public List<ItemSlot> StartingItems;
     }
 }
