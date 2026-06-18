@@ -6,7 +6,6 @@ using System.Collections.Generic;
 
 namespace JRPG.Combat
 {
-    // Context utama pengatur state machine combat.
     public class CombatManager : MonoBehaviour
     {
         private CombatState currentState;
@@ -73,7 +72,39 @@ namespace JRPG.Combat
             }
         }
 
-        // Fungsi publik agar AI juga bisa mengeksekusi skill strategy.
+        // Mengeksekusi efek item dan menghapusnya dari inventory.
+        public void OnItemButtonClicked(ItemData item)
+        {
+            if (currentState is PlayerTurnState)
+            {
+                if (Player.TryGetComponent<InventoryComponent>(out var invComp))
+                {
+                    if (invComp.RemoveItem(item, 1))
+                    {
+                        Debug.Log($"{Player.gameObject.name} uses {item.ItemName}!");
+                        ApplyItemEffect(Player, item);
+                        CheckCombatEndCondition();
+                    }
+                    else
+                    {
+                        Debug.Log("Item out of stock!");
+                    }
+                }
+            }
+        }
+
+        // Menentukan efek spesifik berdasarkan tipe item.
+        private void ApplyItemEffect(Entity target, ItemData item)
+        {
+            if (item.Type == ItemType.Consumable)
+            {
+                if (target.TryGetComponent<HealthComponent>(out var healthComp))
+                {
+                    healthComp.Heal(item.EffectValue);
+                }
+            }
+        }
+
         public void ExecuteSkill(Entity caster, Entity target, SkillData skill)
         {
             if (skillStrategies.TryGetValue(skill.Type, out var strategy))

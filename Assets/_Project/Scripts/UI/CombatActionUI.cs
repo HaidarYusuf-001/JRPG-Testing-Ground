@@ -17,6 +17,10 @@ namespace JRPG.UI
         public GameObject SkillButtonPrefab;
         public Transform SkillPanel;
 
+        [Header("Items Setup")]
+        public GameObject ItemButtonPrefab;
+        public Transform ItemPanel;
+
         private void OnEnable()
         {
             Manager.OnPlayerTurnStarted += ShowPanel;
@@ -37,7 +41,6 @@ namespace JRPG.UI
             GenerateSkillButtons();
         }
 
-        // Membuat tombol secara dinamis berdasarkan data skill karakter.
         private void GenerateSkillButtons()
         {
             if (Manager.Player.TryGetComponent<SkillComponent>(out var skillComp))
@@ -52,7 +55,40 @@ namespace JRPG.UI
             }
         }
 
-        private void ShowPanel() => ActionPanel.SetActive(true);
-        private void HidePanel() => ActionPanel.SetActive(false);
+        // Menghapus tombol lama dan membuat ulang berdasarkan data inventory terbaru.
+        private void RefreshItemButtons()
+        {
+            foreach (Transform child in ItemPanel)
+            {
+                Destroy(child.gameObject);
+            }
+
+            if (Manager.Player.TryGetComponent<InventoryComponent>(out var invComp))
+            {
+                foreach (ItemSlot slot in invComp.Slots)
+                {
+                    if (slot.Item.Type == ItemType.Consumable)
+                    {
+                        GameObject btnObj = Instantiate(ItemButtonPrefab, ItemPanel);
+                        btnObj.GetComponentInChildren<TextMeshProUGUI>().text = $"{slot.Item.ItemName} (x{slot.Quantity})";
+
+                        // Menangkap reference item ke variabel lokal untuk lambda expression.
+                        ItemData currentItem = slot.Item;
+                        btnObj.GetComponent<Button>().onClick.AddListener(() => Manager.OnItemButtonClicked(currentItem));
+                    }
+                }
+            }
+        }
+
+        private void ShowPanel()
+        {
+            ActionPanel.SetActive(true);
+            RefreshItemButtons();
+        }
+
+        private void HidePanel()
+        {
+            ActionPanel.SetActive(false);
+        }
     }
 }
