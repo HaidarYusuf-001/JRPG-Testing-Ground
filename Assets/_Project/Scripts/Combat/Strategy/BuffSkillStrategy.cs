@@ -1,25 +1,26 @@
+using System.Threading.Tasks;
 using UnityEngine;
 using JRPG.Core;
 using JRPG.Data;
 
 namespace JRPG.Combat
 {
-    // Menerapkan efek status ke target sesuai data dari skill.
     public class BuffSkillStrategy : ISkillStrategy
     {
-        public void Execute(Entity caster, Entity target, SkillData data)
+        public async Task ExecuteAsync(Entity caster, Entity target, SkillData data, CombatManager manager)
         {
-            Debug.Log($"{caster.gameObject.name} casts {data.SkillName}!");
+            bool hasTimeline = manager.GenericSkillTimeline != null && manager.CombatDirector != null;
+            manager.PlayTimeline(manager.GenericSkillTimeline);
+
+            await manager.WaitForImpact(hasTimeline);
 
             if (data.EffectToApply != null && target.TryGetComponent<StatusEffectComponent>(out var statusComp))
             {
                 statusComp.ApplyEffect(data.EffectToApply);
-                Debug.Log($"Applied {data.EffectToApply.EffectName} to {target.gameObject.name}");
             }
-            else
-            {
-                Debug.Log("Failed to apply effect. Target might not have StatusEffectComponent or Effect data is null.");
-            }
+
+            await manager.WaitForTimelineEnd(hasTimeline);
+            manager.CheckCombatEndCondition();
         }
     }
 }

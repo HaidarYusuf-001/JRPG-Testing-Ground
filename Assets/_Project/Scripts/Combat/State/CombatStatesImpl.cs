@@ -35,7 +35,7 @@ namespace JRPG.Combat
 
         public override void ExitState()
         {
-            combatManager.HidePlayerTurnUI();
+            // UI akan disembunyikan oleh CombatManager
         }
     }
 
@@ -43,7 +43,8 @@ namespace JRPG.Combat
     {
         public EnemyTurnState(CombatManager manager) : base(manager) { }
 
-        public override void EnterState()
+        // Menerapkan async modifier untuk menunggu task eksekusi dari manager.
+        public override async void EnterState()
         {
             combatManager.ProcessStatusEffects(combatManager.Enemy);
 
@@ -65,7 +66,7 @@ namespace JRPG.Combat
                     {
                         Debug.Log($"Enemy AI uses {skillToUse.SkillName}!");
                         Entity target = skillToUse.Type == SkillType.Heal || skillToUse.Type == SkillType.Buff ? combatManager.Enemy : combatManager.Player;
-                        combatManager.ExecuteSkill(combatManager.Enemy, target, skillToUse);
+                        await combatManager.ExecuteSkillAsync(combatManager.Enemy, target, skillToUse);
                         skillExecuted = true;
                     }
                 }
@@ -74,10 +75,8 @@ namespace JRPG.Combat
             if (!skillExecuted)
             {
                 Debug.Log("Enemy's Turn: AI is attacking physically...");
-                combatManager.ExecutePhysicalAttack(combatManager.Enemy, combatManager.Player);
+                await combatManager.ExecutePhysicalAttackAsync(combatManager.Enemy, combatManager.Player, combatManager.EnemyAttackTimeline);
             }
-
-            combatManager.CheckCombatEndCondition();
         }
     }
 
@@ -91,7 +90,6 @@ namespace JRPG.Combat
             ProcessRewards();
         }
 
-        // Mengekstrak reward dari data musuh dan mendistribusikannya ke pemain.
         private void ProcessRewards()
         {
             var enemyData = combatManager.Enemy.BaseData;
@@ -103,18 +101,15 @@ namespace JRPG.Combat
                 progress.AddGold(enemyData.GoldReward);
             }
 
-            if (combatManager.Player.TryGetComponent<InventoryComponent>(out var inventory))
+            if (combatManager.Player.TryGetComponent<InventoryComponent>(out var inventory) && enemyData.LootDrops != null)
             {
-                if (enemyData.LootDrops != null)
+                foreach (var drop in enemyData.LootDrops)
                 {
-                    foreach (var drop in enemyData.LootDrops)
+                    if (Random.Range(0f, 100f) <= drop.DropChance)
                     {
-                        if (Random.Range(0f, 100f) <= drop.DropChance)
-                        {
-                            int amount = Random.Range(drop.MinQuantity, drop.MaxQuantity + 1);
-                            inventory.AddItem(drop.Item, amount);
-                            Debug.Log($"Loot Drop: {drop.Item.ItemName} x{amount} added to inventory.");
-                        }
+                        int amount = Random.Range(drop.MinQuantity, drop.MaxQuantity + 1);
+                        inventory.AddItem(drop.Item, amount);
+                        Debug.Log($"Loot Drop: {drop.Item.ItemName} x{amount} added to inventory.");
                     }
                 }
             }

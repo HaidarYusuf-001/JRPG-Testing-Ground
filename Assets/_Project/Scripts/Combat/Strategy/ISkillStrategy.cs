@@ -1,11 +1,12 @@
+using System.Threading.Tasks;
 using JRPG.Core;
 using JRPG.Data;
 
 namespace JRPG.Combat
 {
-    // Interface untuk pola eksekusi skill.
+    // Interface strategy yang mendukung eksekusi asynchronous menggunakan Task.
     public interface ISkillStrategy
     {
-        void Execute(Entity caster, Entity target, SkillData data);
+        Task ExecuteAsync(Entity caster, Entity target, SkillData data, CombatManager manager);
     }
 }

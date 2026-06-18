@@ -1,19 +1,26 @@
+using System.Threading.Tasks;
 using UnityEngine;
 using JRPG.Core;
 using JRPG.Data;
 
 namespace JRPG.Combat
 {
-    // Eksekusi skill yang berfokus pada penambahan HP.
     public class HealSkillStrategy : ISkillStrategy
     {
-        public void Execute(Entity caster, Entity target, SkillData data)
+        public async Task ExecuteAsync(Entity caster, Entity target, SkillData data, CombatManager manager)
         {
+            bool hasTimeline = manager.GenericSkillTimeline != null && manager.CombatDirector != null;
+            manager.PlayTimeline(manager.GenericSkillTimeline);
+
+            await manager.WaitForImpact(hasTimeline);
+
             if (target.TryGetComponent<HealthComponent>(out var healthComp))
             {
-                Debug.Log($"{caster.gameObject.name} uses {data.SkillName}!");
                 healthComp.Heal(data.Power);
             }
+
+            await manager.WaitForTimelineEnd(hasTimeline);
+            manager.CheckCombatEndCondition();
         }
     }
 }
