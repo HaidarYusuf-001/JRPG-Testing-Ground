@@ -17,7 +17,27 @@ namespace JRPG.Core
             if (TryGetComponent<HealthComponent>(out var healthComp)) healthComp.Initialize(BaseData.BaseHP);
             if (TryGetComponent<ManaComponent>(out var manaComp)) manaComp.Initialize(BaseData.BaseMP);
             if (TryGetComponent<SkillComponent>(out var skillComp)) skillComp.Initialize(BaseData.BaseSkills);
-            if (TryGetComponent<InventoryComponent>(out var invComp)) invComp.Initialize(BaseData.StartingItems);
+
+            if (TryGetComponent<InventoryComponent>(out var invComp))
+            {
+                invComp.Initialize(BaseData.StartingItems);
+
+                if (TryGetComponent<EquipmentComponent>(out var equipComp))
+                {
+                    AutoEquipStartingGear(invComp, equipComp);
+                }
+            }
+        }
+
+        private void AutoEquipStartingGear(InventoryComponent inventory, EquipmentComponent equipment)
+        {
+            foreach (var slot in inventory.Slots)
+            {
+                if (slot.Item is EquipmentData equipData)
+                {
+                    equipment.Equip(equipData);
+                }
+            }
         }
     }
 }
