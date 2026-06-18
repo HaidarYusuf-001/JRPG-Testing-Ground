@@ -21,6 +21,14 @@ namespace JRPG.Combat
 
         public override void EnterState()
         {
+            combatManager.ProcessStatusEffects(combatManager.Player);
+
+            if (combatManager.Player.TryGetComponent<HealthComponent>(out var hp) && hp.GetCurrentHealth() <= 0)
+            {
+                combatManager.CheckCombatEndCondition();
+                return;
+            }
+
             Debug.Log("Player's Turn: Waiting for UI input...");
             combatManager.TriggerPlayerTurnUI();
         }
@@ -37,9 +45,16 @@ namespace JRPG.Combat
 
         public override void EnterState()
         {
+            combatManager.ProcessStatusEffects(combatManager.Enemy);
+
+            if (combatManager.Enemy.TryGetComponent<HealthComponent>(out var hp) && hp.GetCurrentHealth() <= 0)
+            {
+                combatManager.CheckCombatEndCondition();
+                return;
+            }
+
             bool skillExecuted = false;
 
-            // Logika AI sederhana untuk mengecek kepemilikan skill dan kapasitas MP.
             if (combatManager.Enemy.TryGetComponent<SkillComponent>(out var skillComp) && skillComp.AvailableSkills.Count > 0)
             {
                 SkillData skillToUse = skillComp.AvailableSkills[0];
@@ -49,14 +64,13 @@ namespace JRPG.Combat
                     if (manaComp.Consume(skillToUse.ManaCost))
                     {
                         Debug.Log($"Enemy AI uses {skillToUse.SkillName}!");
-                        Entity target = skillToUse.Type == SkillType.Heal ? combatManager.Enemy : combatManager.Player;
+                        Entity target = skillToUse.Type == SkillType.Heal || skillToUse.Type == SkillType.Buff ? combatManager.Enemy : combatManager.Player;
                         combatManager.ExecuteSkill(combatManager.Enemy, target, skillToUse);
                         skillExecuted = true;
                     }
                 }
             }
 
-            // Jika tidak ada skill, MP habis, atau tidak punya komponen, lakukan serangan dasar.
             if (!skillExecuted)
             {
                 Debug.Log("Enemy's Turn: AI is attacking physically...");

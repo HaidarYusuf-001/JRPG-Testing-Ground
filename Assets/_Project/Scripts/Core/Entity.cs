@@ -1,19 +1,18 @@
 using System.Collections.Generic;
 using UnityEngine;
+using JRPG.Data;
 
 namespace JRPG.Core
 {
-    // Wadah identitas dasar dan data stat murni untuk semua entitas.
     public abstract class Entity : MonoBehaviour
     {
-        public Dictionary<string, Stat> Stats = new Dictionary<string, Stat>();
+        public Dictionary<StatType, Stat> Stats = new Dictionary<StatType, Stat>();
 
         protected virtual void Awake()
         {
             InitializeStats();
         }
 
-        // Diimplementasikan oleh child class untuk memuat data.
         protected abstract void InitializeStats();
     }
 }

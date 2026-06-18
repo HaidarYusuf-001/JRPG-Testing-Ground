@@ -23,7 +23,8 @@ namespace JRPG.Combat
             skillStrategies = new Dictionary<SkillType, ISkillStrategy>
             {
                 { SkillType.Damage, new DamageSkillStrategy() },
-                { SkillType.Heal, new HealSkillStrategy() }
+                { SkillType.Heal, new HealSkillStrategy() },
+                { SkillType.Buff, new BuffSkillStrategy() }
             };
         }
 
@@ -66,13 +67,12 @@ namespace JRPG.Combat
                     }
                 }
 
-                Entity target = skill.Type == SkillType.Heal ? Player : Enemy;
+                Entity target = skill.Type == SkillType.Heal || skill.Type == SkillType.Buff ? Player : Enemy;
                 ExecuteSkill(Player, target, skill);
                 CheckCombatEndCondition();
             }
         }
 
-        // Mengeksekusi efek item dan menghapusnya dari inventory.
         public void OnItemButtonClicked(ItemData item)
         {
             if (currentState is PlayerTurnState)
@@ -85,15 +85,10 @@ namespace JRPG.Combat
                         ApplyItemEffect(Player, item);
                         CheckCombatEndCondition();
                     }
-                    else
-                    {
-                        Debug.Log("Item out of stock!");
-                    }
                 }
             }
         }
 
-        // Menentukan efek spesifik berdasarkan tipe item.
         private void ApplyItemEffect(Entity target, ItemData item)
         {
             if (item.Type == ItemType.Consumable)
@@ -117,14 +112,22 @@ namespace JRPG.Combat
         {
             if (!defender.TryGetComponent<HealthComponent>(out var targetHealth)) return;
 
-            float damage = attacker.Stats["Attack"].CurrentValue;
-            if (defender.Stats.ContainsKey("Defense"))
+            float damage = attacker.Stats[StatType.Attack].Value;
+            if (defender.Stats.ContainsKey(StatType.Defense))
             {
-                damage = Mathf.Max(1f, damage - defender.Stats["Defense"].CurrentValue);
+                damage = Mathf.Max(1f, damage - defender.Stats[StatType.Defense].Value);
             }
 
             Debug.Log($"{attacker.gameObject.name} attacks for {damage} damage!");
             targetHealth.TakeDamage(damage);
+        }
+
+        public void ProcessStatusEffects(Entity entity)
+        {
+            if (entity.TryGetComponent<StatusEffectComponent>(out var statusComp))
+            {
+                statusComp.ProcessTurn();
+            }
         }
 
         public void CheckCombatEndCondition()

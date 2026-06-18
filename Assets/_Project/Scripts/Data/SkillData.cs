@@ -2,9 +2,8 @@ using UnityEngine;
 
 namespace JRPG.Data
 {
-    public enum SkillType { Damage, Heal }
+    public enum SkillType { Damage, Heal, Buff }
 
-    // Menyimpan atribut data murni dari sebuah skill.
     [CreateAssetMenu(fileName = "NewSkillData", menuName = "JRPG/Data/Skill Data")]
     public class SkillData : ScriptableObject
     {
@@ -12,5 +11,6 @@ namespace JRPG.Data
         public SkillType Type;
         public float Power;
         public float ManaCost;
+        public StatusEffectData EffectToApply; // Efek opsional yang diterapkan oleh skill ini
     }
 }
