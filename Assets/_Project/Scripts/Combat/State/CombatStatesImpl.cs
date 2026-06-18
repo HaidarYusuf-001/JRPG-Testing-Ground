@@ -88,6 +88,36 @@ namespace JRPG.Combat
         public override void EnterState()
         {
             Debug.Log("Result: You Win! Combat Ended.");
+            ProcessRewards();
+        }
+
+        // Mengekstrak reward dari data musuh dan mendistribusikannya ke pemain.
+        private void ProcessRewards()
+        {
+            var enemyData = combatManager.Enemy.BaseData;
+            if (enemyData == null) return;
+
+            if (combatManager.Player.TryGetComponent<PlayerProgressComponent>(out var progress))
+            {
+                progress.AddExp(enemyData.ExpReward);
+                progress.AddGold(enemyData.GoldReward);
+            }
+
+            if (combatManager.Player.TryGetComponent<InventoryComponent>(out var inventory))
+            {
+                if (enemyData.LootDrops != null)
+                {
+                    foreach (var drop in enemyData.LootDrops)
+                    {
+                        if (Random.Range(0f, 100f) <= drop.DropChance)
+                        {
+                            int amount = Random.Range(drop.MinQuantity, drop.MaxQuantity + 1);
+                            inventory.AddItem(drop.Item, amount);
+                            Debug.Log($"Loot Drop: {drop.Item.ItemName} x{amount} added to inventory.");
+                        }
+                    }
+                }
+            }
         }
     }
 

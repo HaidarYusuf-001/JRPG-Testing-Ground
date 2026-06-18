@@ -14,5 +14,10 @@ namespace JRPG.Data
         public float BaseDefense;
         public List<SkillData> BaseSkills;
         public List<ItemSlot> StartingItems;
+
+        [Header("Rewards (For Enemies)")]
+        public int ExpReward;
+        public int GoldReward;
+        public List<LootDrop> LootDrops;
     }
 }
