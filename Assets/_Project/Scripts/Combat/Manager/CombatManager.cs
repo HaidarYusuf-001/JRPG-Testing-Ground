@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace JRPG.Combat
 {
+    // Context utama pengatur state machine combat dan cinematic.
     public class CombatManager : MonoBehaviour
     {
         private CombatState currentState;
@@ -27,6 +28,7 @@ namespace JRPG.Combat
 
         public event Action OnPlayerTurnStarted;
         public event Action OnPlayerTurnEnded;
+        public event Action<bool> OnCombatEnded;
 
         private void Awake()
         {
@@ -98,19 +100,16 @@ namespace JRPG.Combat
             }
         }
 
-        // Dipanggil oleh Timeline Signal Receiver saat impact animasi terjadi.
         public void TriggerImpactSignal()
         {
             impactSignalTcs?.TrySetResult(true);
         }
 
-        // Dipanggil otomatis saat Timeline selesai memutar seluruh durasinya.
         private void OnTimelineStopped(PlayableDirector director)
         {
             timelineEndTcs?.TrySetResult(true);
         }
 
-        // Mengatur ulang TaskCompletionSource dan memutar timeline.
         public void PlayTimeline(PlayableAsset timeline)
         {
             if (timeline == null || CombatDirector == null) return;
@@ -120,14 +119,12 @@ namespace JRPG.Combat
             CombatDirector.Play();
         }
 
-        // Membekukan eksekusi C# hingga sinyal impact masuk atau menggunakan fallback 0.5 detik.
         public async Task WaitForImpact(bool hasTimeline)
         {
             if (hasTimeline && impactSignalTcs != null) await impactSignalTcs.Task;
             else await Task.Delay(500);
         }
 
-        // Membekukan eksekusi C# hingga timeline selesai atau menggunakan fallback 0.5 detik.
         public async Task WaitForTimelineEnd(bool hasTimeline)
         {
             if (hasTimeline && timelineEndTcs != null) await timelineEndTcs.Task;
@@ -189,5 +186,8 @@ namespace JRPG.Combat
 
         public void TriggerPlayerTurnUI() => OnPlayerTurnStarted?.Invoke();
         public void HidePlayerTurnUI() => OnPlayerTurnEnded?.Invoke();
+
+        // Memicu event akhir pertarungan untuk ditangkap oleh UI.
+        public void TriggerCombatEnd(bool isWin) => OnCombatEnded?.Invoke(isWin);
     }
 }

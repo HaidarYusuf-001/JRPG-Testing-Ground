@@ -35,7 +35,6 @@ namespace JRPG.Combat
 
         public override void ExitState()
         {
-            // UI akan disembunyikan oleh CombatManager
         }
     }
 
@@ -43,7 +42,6 @@ namespace JRPG.Combat
     {
         public EnemyTurnState(CombatManager manager) : base(manager) { }
 
-        // Menerapkan async modifier untuk menunggu task eksekusi dari manager.
         public override async void EnterState()
         {
             combatManager.ProcessStatusEffects(combatManager.Enemy);
@@ -88,6 +86,7 @@ namespace JRPG.Combat
         {
             Debug.Log("Result: You Win! Combat Ended.");
             ProcessRewards();
+            combatManager.TriggerCombatEnd(true);
         }
 
         private void ProcessRewards()
@@ -123,6 +122,7 @@ namespace JRPG.Combat
         public override void EnterState()
         {
             Debug.Log("Result: You Lose! Game Over.");
+            combatManager.TriggerCombatEnd(false);
         }
     }
 }
