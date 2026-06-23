@@ -1,9 +1,9 @@
 using UnityEngine;
 using JRPG.Core;
 
-namespace JRPG.Overworld
+namespace JRPG.Exploration
 {
-    // Mengendalikan pergerakan karakter di map dan memicu random encounter berdasarkan jarak tempuh.
+    // Mengendalikan pergerakan karakter di map dan memicu random encounter.
     [RequireComponent(typeof(CharacterController))]
     public class OverworldPlayerController : MonoBehaviour
     {
