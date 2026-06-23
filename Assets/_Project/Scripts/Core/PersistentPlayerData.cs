@@ -24,5 +24,15 @@ namespace JRPG.Core
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
+
+        // Mereset data progres pemain kembali ke kondisi awal permainan.
+        public void ResetData()
+        {
+            Level = 1;
+            CurrentExp = 0;
+            Gold = 0;
+            HasSavedPosition = false;
+            LastMapPosition = Vector3.zero;
+        }
     }
 }
