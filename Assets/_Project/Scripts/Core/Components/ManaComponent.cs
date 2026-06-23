@@ -3,36 +3,46 @@ using UnityEngine;
 
 namespace JRPG.Core
 {
-    // Mengatur logika MP dan memancarkan event terkait.
+    // Mengelola data resource mana entitas.
     public class ManaComponent : MonoBehaviour
     {
-        private float currentMana;
         private float maxMana;
+        private float currentMana;
 
         public event Action<float, float> OnManaChanged;
 
-        public void Initialize(float maxMP)
+        public void Initialize(float baseMaxMana)
         {
-            maxMana = maxMP;
-            currentMana = maxMP;
+            maxMana = baseMaxMana;
+            currentMana = maxMana;
+            OnManaChanged?.Invoke(currentMana, maxMana);
+        }
+
+        public void UpgradeMaxMana(float newMaxMana, bool fullyRestore)
+        {
+            maxMana = newMaxMana;
+            if (fullyRestore) currentMana = maxMana;
             OnManaChanged?.Invoke(currentMana, maxMana);
         }
 
         public bool Consume(float amount)
         {
-            if (currentMana < amount) return false;
-
-            currentMana -= amount;
-            OnManaChanged?.Invoke(currentMana, maxMana);
-            return true;
+            if (currentMana >= amount)
+            {
+                currentMana -= amount;
+                OnManaChanged?.Invoke(currentMana, maxMana);
+                return true;
+            }
+            return false;
         }
 
         public void Restore(float amount)
         {
-            currentMana = Mathf.Clamp(currentMana + amount, 0f, maxMana);
+            currentMana = Mathf.Min(maxMana, currentMana + amount);
             OnManaChanged?.Invoke(currentMana, maxMana);
         }
 
         public float GetCurrentMana() => currentMana;
+        public float GetMaxMana() => maxMana;
     }
 }

@@ -28,12 +28,12 @@
   <Project Path="Unity.PathTracing.Runtime.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="Unity.PathTracing.Editor.csproj" />
-  <Project Path="Unity.ShaderGraph.Utilities.csproj" />
   <Project Path="JRPG.Core.csproj" />
+  <Project Path="Unity.ShaderGraph.Utilities.csproj" />
+  <Project Path="JRPG.UI.csproj" />
   <Project Path="Unity.SurfaceCache.Runtime.csproj" />
   <Project Path="Unity.InternalAPIEngineBridge.RenderPipelines.Core.Runtime.Shared.csproj" />
   <Project Path="Unity.RenderPipeline.Universal.ShaderLibrary.csproj" />
-  <Project Path="JRPG.UI.csproj" />
   <Project Path="Unity.InternalAPIEngineBridge.004.csproj" />
   <Project Path="Unity.RenderPipelines.Universal.Shaders.csproj" />
   <Project Path="JRPG.Exploration.csproj" />

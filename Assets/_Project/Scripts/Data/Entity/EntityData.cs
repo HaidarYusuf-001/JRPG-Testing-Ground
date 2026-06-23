@@ -15,6 +15,12 @@ namespace JRPG.Data
         public List<SkillData> BaseSkills;
         public List<ItemSlot> StartingItems;
 
+        [Header("Stat Growth (Per Level)")]
+        public float GrowthHP;
+        public float GrowthMP;
+        public float GrowthAttack;
+        public float GrowthDefense;
+
         [Header("Rewards (For Enemies)")]
         public int ExpReward;
         public int GoldReward;
