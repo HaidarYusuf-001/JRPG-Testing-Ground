@@ -37,7 +37,7 @@ namespace JRPG.Overworld
 
         private void Update()
         {
-            if (isEncounterTriggered) return;
+            if (isEncounterTriggered || Time.timeScale == 0f) return;
 
             HandleMovement();
             CheckEncounters();
