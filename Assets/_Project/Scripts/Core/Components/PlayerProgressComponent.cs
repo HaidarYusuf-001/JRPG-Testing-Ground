@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace JRPG.Core
 {
-    // Mengelola data progres karakter seperti level, experience, dan mata uang.
+    // Mengelola data progres karakter dan mensinkronisasikannya dengan data persisten.
     public class PlayerProgressComponent : MonoBehaviour
     {
         public int Level = 1;
@@ -13,7 +13,16 @@ namespace JRPG.Core
         public event Action<int> OnLevelUp;
         public event Action<int> OnGoldChanged;
 
-        // Menambahkan experience dan memicu level up jika threshold tercapai.
+        private void Start()
+        {
+            if (PersistentPlayerData.Instance != null)
+            {
+                Level = PersistentPlayerData.Instance.Level;
+                CurrentExp = PersistentPlayerData.Instance.CurrentExp;
+                Gold = PersistentPlayerData.Instance.Gold;
+            }
+        }
+
         public void AddExp(int amount)
         {
             CurrentExp += amount;
@@ -27,14 +36,24 @@ namespace JRPG.Core
                 Debug.Log($"Level Up! Now Level {Level}");
                 OnLevelUp?.Invoke(Level);
             }
+
+            if (PersistentPlayerData.Instance != null)
+            {
+                PersistentPlayerData.Instance.CurrentExp = CurrentExp;
+                PersistentPlayerData.Instance.Level = Level;
+            }
         }
 
-        // Menambahkan mata uang dan memancarkan event perubahan nilai.
         public void AddGold(int amount)
         {
             Gold += amount;
             Debug.Log($"Gained {amount} Gold. Total: {Gold}");
             OnGoldChanged?.Invoke(Gold);
+
+            if (PersistentPlayerData.Instance != null)
+            {
+                PersistentPlayerData.Instance.Gold = Gold;
+            }
         }
     }
 }

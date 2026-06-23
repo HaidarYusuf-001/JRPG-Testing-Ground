@@ -21,6 +21,17 @@ namespace JRPG.Overworld
         private void Awake()
         {
             controller = GetComponent<CharacterController>();
+        }
+
+        private void Start()
+        {
+            if (PersistentPlayerData.Instance != null && PersistentPlayerData.Instance.HasSavedPosition)
+            {
+                controller.enabled = false;
+                transform.position = PersistentPlayerData.Instance.LastMapPosition;
+                controller.enabled = true;
+            }
+
             lastPosition = transform.position;
         }
 
@@ -79,6 +90,12 @@ namespace JRPG.Overworld
 
         private async void TriggerCombat()
         {
+            if (PersistentPlayerData.Instance != null)
+            {
+                PersistentPlayerData.Instance.LastMapPosition = transform.position;
+                PersistentPlayerData.Instance.HasSavedPosition = true;
+            }
+
             if (SceneTransitionManager.Instance != null)
             {
                 await SceneTransitionManager.Instance.LoadSceneAsync(CombatSceneName);
