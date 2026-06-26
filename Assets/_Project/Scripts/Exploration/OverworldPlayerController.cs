@@ -3,6 +3,7 @@ using JRPG.Core;
 
 namespace JRPG.Exploration
 {
+    // Mengendalikan pergerakan karakter dan mengeksekusi random encounter berdasarkan langkah di zona rumput.
     [RequireComponent(typeof(CharacterController))]
     public class OverworldPlayerController : MonoBehaviour
     {
@@ -64,7 +65,37 @@ namespace JRPG.Exploration
         private void CheckEncounters()
         {
             Vector3 rayOrigin = transform.position + Vector3.up;
-            bool isInGrass = Physics.Raycast(rayOrigin, Vector3.down, RaycastDistance, GrassLayer);
+            bool isInGrass = false;
+
+            // Tembakkan laser penembus ke semua objek di bawah
+            RaycastHit[] hits = Physics.RaycastAll(rayOrigin, Vector3.down, RaycastDistance);
+
+            float closestDistance = float.MaxValue;
+            GameObject closestFloor = null;
+
+            foreach (var hit in hits)
+            {
+                // Abaikan tabrakan dengan collider karakter kita sendiri
+                if (hit.collider.gameObject == gameObject || hit.collider.transform.IsChildOf(transform))
+                    continue;
+
+                // Cari pijakan yang jaraknya paling dekat dengan kaki pemain
+                if (hit.distance < closestDistance)
+                {
+                    closestDistance = hit.distance;
+                    closestFloor = hit.collider.gameObject;
+                }
+            }
+
+            // Jika ada lantai yang diinjak
+            if (closestFloor != null)
+            {
+                // Cek apakah layer lantai teratas tersebut adalah rumput
+                if (((1 << closestFloor.layer) & GrassLayer.value) != 0)
+                {
+                    isInGrass = true;
+                }
+            }
 
             Debug.DrawRay(rayOrigin, Vector3.down * RaycastDistance, isInGrass ? Color.green : Color.red);
 
