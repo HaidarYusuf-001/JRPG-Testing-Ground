@@ -25,6 +25,13 @@ namespace JRPG.Core
             OnHealthChanged?.Invoke(currentHealth, maxHealth);
         }
 
+        // Memaksa pengubahan nilai nyawa saat memuat data persisten.
+        public void SetCurrentHealth(float amount)
+        {
+            currentHealth = Mathf.Clamp(amount, 0, maxHealth);
+            OnHealthChanged?.Invoke(currentHealth, maxHealth);
+        }
+
         public void TakeDamage(float amount)
         {
             currentHealth = Mathf.Max(0f, currentHealth - amount);

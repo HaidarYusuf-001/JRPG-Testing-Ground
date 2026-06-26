@@ -25,6 +25,13 @@ namespace JRPG.Core
             OnManaChanged?.Invoke(currentMana, maxMana);
         }
 
+        // Memaksa pengubahan nilai mana saat memuat data persisten.
+        public void SetCurrentMana(float amount)
+        {
+            currentMana = Mathf.Clamp(amount, 0, maxMana);
+            OnManaChanged?.Invoke(currentMana, maxMana);
+        }
+
         public bool Consume(float amount)
         {
             if (currentMana >= amount)
