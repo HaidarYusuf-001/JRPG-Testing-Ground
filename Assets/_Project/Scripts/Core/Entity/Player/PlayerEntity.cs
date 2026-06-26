@@ -4,6 +4,7 @@ using JRPG.Data;
 
 namespace JRPG.Core
 {
+    // Implementasi entitas karakter pemain dengan dukungan persistensi dan scaling level.
     public class PlayerEntity : Entity
     {
         public EntityData BaseData;
@@ -18,7 +19,6 @@ namespace JRPG.Core
 
             if (TryGetComponent<SkillComponent>(out var skillComp)) skillComp.Initialize(BaseData.BaseSkills);
 
-            // Tampung status pengecekan di awal
             bool isNewGame = PersistentPlayerData.Instance == null || !PersistentPlayerData.Instance.HasInitializedInventory;
 
             if (TryGetComponent<InventoryComponent>(out var invComp))
@@ -45,7 +45,6 @@ namespace JRPG.Core
                     }
                 }
 
-                // Kunci status inisialisasi hanya setelah inventory dan equipment selesai diproses
                 if (isNewGame && PersistentPlayerData.Instance != null)
                 {
                     PersistentPlayerData.Instance.SavedInventory = new List<ItemSlot>(invComp.Slots);
@@ -80,9 +79,10 @@ namespace JRPG.Core
                 if (isInitialization)
                 {
                     healthComp.Initialize(calculatedMaxHP);
-                    if (PersistentPlayerData.Instance != null && PersistentPlayerData.Instance.CurrentHP != -1f)
+                    if (PersistentPlayerData.Instance != null)
                     {
-                        healthComp.SetCurrentHealth(PersistentPlayerData.Instance.CurrentHP);
+                        if (PersistentPlayerData.Instance.CurrentHP != -1f) healthComp.SetCurrentHealth(PersistentPlayerData.Instance.CurrentHP);
+                        else PersistentPlayerData.Instance.CurrentHP = calculatedMaxHP;
                     }
                 }
                 else healthComp.UpgradeMaxHealth(calculatedMaxHP, true);
@@ -93,9 +93,10 @@ namespace JRPG.Core
                 if (isInitialization)
                 {
                     manaComp.Initialize(calculatedMaxMP);
-                    if (PersistentPlayerData.Instance != null && PersistentPlayerData.Instance.CurrentMP != -1f)
+                    if (PersistentPlayerData.Instance != null)
                     {
-                        manaComp.SetCurrentMana(PersistentPlayerData.Instance.CurrentMP);
+                        if (PersistentPlayerData.Instance.CurrentMP != -1f) manaComp.SetCurrentMana(PersistentPlayerData.Instance.CurrentMP);
+                        else PersistentPlayerData.Instance.CurrentMP = calculatedMaxMP;
                     }
                 }
                 else manaComp.UpgradeMaxMana(calculatedMaxMP, true);
@@ -150,6 +151,22 @@ namespace JRPG.Core
                 equipComp.Unequip(slotType);
                 if (Stats.ContainsKey(eq.TargetStat)) Stats[eq.TargetStat].RemoveModifier(eq.ModifierValue);
                 invComp.AddItem(eq, 1);
+                SyncInventoryAndEquipment();
+            }
+        }
+
+        // Mengeksekusi efek item consumable dan mensinkronisasikannya ke data persisten.
+        public void UseConsumableItem(ItemData item)
+        {
+            if (item.Type != ItemType.Consumable || !TryGetComponent<InventoryComponent>(out var invComp)) return;
+
+            if (invComp.RemoveItem(item, 1))
+            {
+                if (TryGetComponent<HealthComponent>(out var healthComp))
+                {
+                    healthComp.Heal(item.EffectValue);
+                    if (PersistentPlayerData.Instance != null) PersistentPlayerData.Instance.CurrentHP = healthComp.GetCurrentHealth();
+                }
                 SyncInventoryAndEquipment();
             }
         }

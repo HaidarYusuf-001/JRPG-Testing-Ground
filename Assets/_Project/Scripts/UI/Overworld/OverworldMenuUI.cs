@@ -6,13 +6,17 @@ using JRPG.Exploration;
 
 namespace JRPG.UI
 {
-    // Mengatur tampilan menu pause dan fungsionalitas save/load game.
+    // Mengatur tampilan menu pause utama dan fungsionalitas save/load game.
     public class OverworldMenuUI : MonoBehaviour
     {
         public GameObject MenuPanel;
+
+        [Header("Status Texts")]
         public TextMeshProUGUI LevelText;
         public TextMeshProUGUI ExpText;
         public TextMeshProUGUI GoldText;
+        public TextMeshProUGUI HPText;
+        public TextMeshProUGUI MPText;
 
         [Header("Buttons")]
         public Button SaveButton;
@@ -59,13 +63,25 @@ namespace JRPG.UI
             }
         }
 
-        private void UpdateUI()
+        public void UpdateUI()
         {
             if (PersistentPlayerData.Instance != null)
             {
                 LevelText.text = $"Level: {PersistentPlayerData.Instance.Level}";
                 ExpText.text = $"EXP: {PersistentPlayerData.Instance.CurrentExp}";
                 GoldText.text = $"Gold: {PersistentPlayerData.Instance.Gold}";
+
+                PlayerEntity player = Object.FindAnyObjectByType<PlayerEntity>();
+                if (player != null && player.TryGetComponent<HealthComponent>(out var hp) && player.TryGetComponent<ManaComponent>(out var mp))
+                {
+                    HPText.text = $"HP: {hp.GetCurrentHealth()}/{hp.GetMaxHealth()}";
+                    MPText.text = $"MP: {mp.GetCurrentMana()}/{mp.GetMaxMana()}";
+                }
+                else
+                {
+                    HPText.text = $"HP: {PersistentPlayerData.Instance.CurrentHP}";
+                    MPText.text = $"MP: {PersistentPlayerData.Instance.CurrentMP}";
+                }
             }
         }
 
@@ -80,7 +96,6 @@ namespace JRPG.UI
                     PersistentPlayerData.Instance.HasSavedPosition = true;
                 }
             }
-
             SaveManager.SaveGame();
         }
 

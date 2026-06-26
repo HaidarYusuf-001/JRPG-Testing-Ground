@@ -12,6 +12,7 @@ namespace JRPG.UI
         [Header("References")]
         public Transform InventoryContentPanel;
         public GameObject InventorySlotPrefab;
+        public OverworldMenuUI MenuUIController;
 
         [Header("Equipped UI")]
         public TextMeshProUGUI WeaponText;
@@ -24,6 +25,7 @@ namespace JRPG.UI
         private void OnEnable()
         {
             player = FindAnyObjectByType<PlayerEntity>();
+            if (MenuUIController == null) MenuUIController = GetComponent<OverworldMenuUI>();
 
             if (UnequipWeaponButton != null) UnequipWeaponButton.onClick.AddListener(() => OnUnequipButtonClicked(EquipmentSlot.Weapon));
             if (UnequipArmorButton != null) UnequipArmorButton.onClick.AddListener(() => OnUnequipButtonClicked(EquipmentSlot.Armor));
@@ -61,9 +63,14 @@ namespace JRPG.UI
             {
                 OnEquipButtonClicked(equipment);
             }
-            else
+            else if (item.Type == ItemType.Consumable)
             {
-                Debug.Log($"Penggunaan item consumable {item.ItemName} di overworld belum diimplementasikan.");
+                if (player != null)
+                {
+                    player.UseConsumableItem(item);
+                    RefreshUI();
+                    if (MenuUIController != null) MenuUIController.UpdateUI();
+                }
             }
         }
 
@@ -71,10 +78,7 @@ namespace JRPG.UI
         {
             if (PersistentPlayerData.Instance == null) return;
 
-            foreach (Transform child in InventoryContentPanel)
-            {
-                Destroy(child.gameObject);
-            }
+            foreach (Transform child in InventoryContentPanel) Destroy(child.gameObject);
 
             foreach (var slot in PersistentPlayerData.Instance.SavedInventory)
             {
